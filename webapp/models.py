@@ -13,8 +13,17 @@ class User(db.Model):
         lazy='dynamic'
     )
 
+    def __init__(self, username):
+    	self.username = username
+
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+    def set_password(self, password):
+    	self.password = bcrypt.generate_password_hash(password)
+
+    def check_password(self, password):
+    	return bcrypt.check_password_hash(self.password, password)
 
 tags = db.Table('post_tags',
     db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
