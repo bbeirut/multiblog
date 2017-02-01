@@ -1,6 +1,7 @@
 import datetime
 from os import path
 from flask import Blueprint, redirect, render_template, url_for, session
+from flask_login import login_required
 from sqlalchemy import func
 
 from webapp.models import db, Post, Tag, Comment, User, tags
@@ -24,15 +25,6 @@ def sidebar_data():
     ).group_by(Tag).order_by('total DESC').limit(5).all()
 
     return recent, top_tags
-
-@blog_blueprint.before_request
-def check_user():
-    if 'username' in session:
-        g.current_user = User.query.filter_by(
-            username=session['username']
-        ).one()
-    else:
-        g.current_user = None
 
 @blog_blueprint.route('/')
 @blog_blueprint.route('/<int:page>')
@@ -109,10 +101,11 @@ def user(username):
     )
 
 @blog_blueprint.route('/new', methods=['GET', 'POST'])
+@login_required
 def new_post():
     form = PostForm()
 
-    if not g.current_user:
+    if not current_user:
         return redirect(url_for('main.login'))
 
     if form.validate_on_submit():
@@ -126,14 +119,15 @@ def new_post():
     return render_template('new.html', form=form)
 
 @blog_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_post(id):
     post = Post.query.get_or_404(id)
     form = PostForm()
 
-    if not g.current_user:
+    if not current_user:
         return redirect(url_for('main.login'))
 
-    if g.current_user != post.user:
+    if current_user != post.user:
         abort(403)
 
     if form.validate_on_submit():

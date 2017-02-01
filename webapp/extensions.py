@@ -1,5 +1,6 @@
 from flask import session
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 from flask_openid import OpenID
 from flask_oauth import OAuth
 
@@ -8,6 +9,18 @@ from models import db, User
 bcrypt = Bcrypt()
 oid = OpenID()
 oauth = OAuth()
+
+login_manager = LoginManager()
+
+login_manager.login_view = "main.login"
+login_manager.session_protection = "strong"
+login_manager.login_message = "Please login to access this page"
+login_manager.login_message_category = "info"
+
+@login_manager.user_loader
+def load_user(userid):
+	from models import User
+	return User.query.get(userid)
 
 @oid.after_login
 def create_or_login(resp):
@@ -32,8 +45,8 @@ facebook = oauth.remote_app(
 	request_token_url = None,
 	access_token_url='/oauth/access_token',
 	authorize_url='https://www.facebook.com/dialog/oauth',
-	consumer_key='',
-	consumer_secret='',
+	consumer_key='1237978796216280',
+	consumer_secret='b76454304072f9eeacb1671157ce72eb',
 	request_token_params={'scope':'email'}
 )
 
@@ -47,8 +60,8 @@ twitter = oauth.remote_app(
 	request_token_url='https://api.twitter.com/oauth/request_token',
 	access_token_url='https://api.twitter.com/oauth/access_token',
 	authorize_url='https://api.twitter.com/oauth/authenticate',
-	consumer_key='',
-    consumer_secret=''
+	consumer_key='fOe3Zz95dm4C8WJiK2pTSFHqX',
+    consumer_secret='EuIV7yAzVMAj9fs5z7T3sa4UqFMWGQvS8rS7v3dDac7nIOEdmP'
 )
 
 @twitter.tokengetter

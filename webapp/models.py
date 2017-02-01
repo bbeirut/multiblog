@@ -1,6 +1,13 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import AnonymousUserMixin
 
 db = SQLAlchemy()
+
+roles = db.Table(
+    'role_users',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+)
 
 class User(db.Model):
 
@@ -11,6 +18,11 @@ class User(db.Model):
         'Post',
         backref='user',
         lazy='dynamic'
+    )
+    roles = db.relationship(
+        'Role',
+        secondary=roles,
+        backref=db.backref('users', lazy='dynamic')
     )
 
     def __init__(self, username):
@@ -24,6 +36,24 @@ class User(db.Model):
 
     def check_password(self, password):
     	return bcrypt.check_password_hash(self.password, password)
+
+    def is_authenticated(self):
+        if isinstance(self, AnonymousUserMixin):
+            return False
+        else:
+            return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        if isinstance(self, AnonymousUserMixin):
+            return True
+        else:
+            return False
+
+    def get_id(self):
+        return unicode(self.id)
 
 tags = db.Table('post_tags',
     db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
@@ -72,3 +102,14 @@ class Tag(db.Model):
 
     def __repr__(self):
         return '<Tag {}>'.format(self.title)
+
+class Role(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return '<Role {}>'.format(self.name)

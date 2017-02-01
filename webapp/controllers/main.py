@@ -6,6 +6,7 @@ from flask import (Blueprint,
 					session,
 					flash
 )
+from flask_login import login_user, logout_user
 
 from webapp.extensions import oid, facebook, twitter
 from webapp.forms import LoginForm, RegisterForm, OpenIDForm
@@ -73,8 +74,7 @@ def login():
 		)
 
 	if form.validate_on_submit():
-		#Add username to session
-		session['username'] = form.username.data
+		login_user(user, remember=form.remember.data)
 
 		flash("You have been logged in.", category="success")
 		return redirect(url_for('blog.home'))
@@ -87,9 +87,7 @@ def login():
 
 @main_blueprint.route('/logout', methods=['GET', 'POST'])
 def logout():
-	#Remove username from session
-	session.pop('username', None)
-
+	logout_user()
 	flash("You have been logged out.", category="success")
 	return redirect(url_for('blog.home'))
 
