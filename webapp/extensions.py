@@ -3,6 +3,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_openid import OpenID
 from flask_oauth import OAuth
+from flask_principal import Principal, Permission, RoleNeed
 
 from models import db, User
 
@@ -67,3 +68,8 @@ twitter = oauth.remote_app(
 @twitter.tokengetter
 def get_twitter_oauth_token():
 	return session.get('twitter_oauth_token')
+
+principals = Principal()
+admin_permission = Permission(RoleNeed('admin'))
+default_permission = Permission(RoleNeed('default'))
+poster_permission = Permission(RoleNeed('poster'))
