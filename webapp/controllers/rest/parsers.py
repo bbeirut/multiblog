@@ -42,6 +42,30 @@ post_post_parser.add_argument(
 	help='Auth token is required to create posts'
 )
 
+post_put_parser = reqparse.RequestParser()
+post_put_parser.add_argument(
+	'token',
+	type=str,
+	required=True,
+	help='Autho token is required to edit posts'
+)
+
+post_put_parser.add_argument(
+	'title',
+	type=str
+)
+
+post_put_parser.add_argument(
+	'text',
+	type=str
+)
+
+post_put_parser.add_argument(
+	'tag',
+	type=str,
+	action='append'
+)
+
 user_post_parser = reqparse.RequestParser()
 user_post_parser.add_argument('username', type=str, required=True)
 user_post_parser.add_argument('password', type=str, required=True)
