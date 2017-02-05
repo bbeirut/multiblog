@@ -2,6 +2,8 @@ from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import StringField, TextAreaField, PasswordField, BooleanField
 from wtforms.validators import DataRequired, Length, EqualTo, URL
 
+from .models import User
+
 class OpenIDForm(FlaskForm):
 	openid = StringField('OpenID Url', [DataRequired(), URL()])
 
@@ -30,7 +32,7 @@ class LoginForm(FlaskForm):
 			return False
 
 		# Do passwords match
-		if not self.user.check_password(self.password.data):
+		if not user.check_password(self.password.data):
 			self.username.errors.append(
 				'Invalid username or password'
 			)

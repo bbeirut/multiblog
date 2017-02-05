@@ -4,7 +4,8 @@ from flask import (Blueprint,
                     render_template,
                     url_for,
                     session,
-                    flash
+                    flash,
+                    current_app
 )
 from flask_login import login_user, logout_user
 from flask_principal import Identity, AnonymousIdentity, identity_changed
@@ -75,6 +76,7 @@ def login():
         )
 
     if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).one()
         login_user(user, remember=form.remember.data)
 
         identity_changed.send(
@@ -117,9 +119,8 @@ def register():
         )
 
     if form.validate_on_submit():
-        new_user = User()
-        new_user.username = form.username.data
-        new_user.set_password = (form.password.data)
+        new_user = User(form.username.data)
+        new_user.set_password(form.password.data)
 
         db.session.add(new_user)
         db.session.commit()

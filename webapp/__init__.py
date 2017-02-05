@@ -1,12 +1,14 @@
 from config import DevConfig
 from flask import Flask
+from flask_login import current_user
 from flask_principal import identity_loaded, UserNeed, RoleNeed
 
 from models import db
 from controllers.blog import blog_blueprint
 from controllers.main import main_blueprint
-from webapp.extensions import bcrypt, oid,login_manager, principals
-
+from .extensions import bcrypt, oid,login_manager, principals, rest_api
+from .controllers.rest.auth import AuthApi
+from .controllers.rest.post import PostApi
 def create_app(object_name):
     app = Flask(__name__)
     app.config.from_object(DevConfig)
@@ -16,11 +18,22 @@ def create_app(object_name):
     oid.init_app(app)
     login_manager.init_app(app)
     principals.init_app(app)
+    rest_api.add_resource(
+    	PostApi, 
+    	'/api/post',
+    	'/api/post/<int:post_id>',
+    	endpoint='api'
+    )
+    rest_api.add_resource(
+    	AuthApi, 
+    	'/api/auth'
+    )
+    rest_api.init_app(app)
 
     @identity_loaded.connect_via(app)
-    def on_identity_loaded(sender, indentity):
+    def on_identity_loaded(sender, identity):
     	#set the identity user object 
-    	indentity.user = current_user
+    	identity.user = current_user
 
     	#Add UserNeed to identity
     	if hasattr(current_user, 'id'):
